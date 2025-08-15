@@ -51,6 +51,11 @@ A Home Assistant Lovelace card that presents a clean, high‑contrast status pan
 ## Example YAML
 See [`lovelace/elegoo_saturn_ultra_card.yaml`](lovelace/elegoo_saturn_ultra_card.yaml) for the full, ready‑to‑paste configuration (the same content you see in this repository).
 
+## Examples
+
+**Ghost controls (Idle)**
+![Card example – idle state](assets/card_example_idle.png)
+
 ## Folder Structure
 ```
 elegoo-saturn-ultra-card/
