@@ -16,7 +16,7 @@ A Home Assistant Lovelace card that presents a clean, high‑contrast status pan
 - Uses a background PNG for a polished look.
 
 ## Requirements
-- **Home Assistant** with a working **Elegoo printer** integration exposing entities like:
+- **Home Assistant** with a working [**Elegoo printer** integration](https://github.com/danielcherubini/elegoo-homeassistant) exposing entities like:
   - `sensor.<base>_current_status` **or** `sensor.<base>_print_status` (anchor)
   - `sensor.<base>_percent_complete`
   - `sensor.<base>_remaining_print_time`
