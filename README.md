@@ -54,7 +54,7 @@ See [`lovelace/elegoo_saturn_ultra_card.yaml`](lovelace/elegoo_saturn_ultra_card
 ## Examples
 | Active controls | Idle controls |
 | --- | --- |
-| <img src="assets/card_example_active.png" width="420"> | <img src="assets/card_example_idle.png" width="420"> |
+| <img src="assets/card_example_active.png" width="420" alt="Active controls"> | <img src="assets/card_example_idle.png" width="420" alt="Idle controls"> |
 
 
 ## Folder Structure
