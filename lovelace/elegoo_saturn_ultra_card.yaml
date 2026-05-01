@@ -7,81 +7,10 @@ card:
 card_param: cards
 filter:
   template: >
-    {%- set fallback_title = 'Saturn 4' -%}
-    {%- set fallback_power_entity = 'switch.saturn_4_power' -%}
     {%- set entities = integration_entities('elegoo_printer') -%}
     {%- if entities | count == 0 -%}
     [
-      {
-        'type':'vertical-stack',
-        'cards': [
-          {
-            'type':'markdown',
-            'content':'**' ~ fallback_title ~ '**\nElegoo Printer integration not loaded'
-          },
-          {
-            'type':'horizontal-stack',
-            'cards': [
-              {
-                'type':'custom:button-card',
-                'name':'Power On',
-                'label': fallback_power_entity,
-                'icon':'mdi:power',
-                'show_label': true,
-                'tap_action': {
-                  'action':'call-service',
-                  'service':'switch.turn_on',
-                  'data': { 'entity_id': fallback_power_entity }
-                },
-                'hold_action': { 'action':'more-info', 'entity': fallback_power_entity },
-                'styles': {
-                  'card': [
-                    { 'border-radius':'12px' },
-                    { 'padding':'10px' }
-                  ],
-                  'name': [
-                    { 'font-weight':'700' }
-                  ],
-                  'label': [
-                    { 'font-size':'11px' },
-                    { 'opacity':'0.75' }
-                  ]
-                }
-              },
-              {
-                'type':'custom:button-card',
-                'name':'Re-check',
-                'label':'Reload printer config entry',
-                'icon':'mdi:refresh',
-                'show_label': true,
-                'tap_action': {
-                  'action':'call-service',
-                  'service':'homeassistant.reload_config_entry',
-                  'data': { 'entity_id': fallback_power_entity }
-                },
-                'hold_action': {
-                  'action':'call-service',
-                  'service':'homeassistant.update_entity',
-                  'data': { 'entity_id': fallback_power_entity }
-                },
-                'styles': {
-                  'card': [
-                    { 'border-radius':'12px' },
-                    { 'padding':'10px' }
-                  ],
-                  'name': [
-                    { 'font-weight':'700' }
-                  ],
-                  'label': [
-                    { 'font-size':'11px' },
-                    { 'opacity':'0.75' }
-                  ]
-                }
-              }
-            ]
-          }
-        ]
-      }
+      { 'type':'markdown','content':'**Saturn 4**\nElegoo Printer integration not loaded' }
     ]
     {%- else -%}
     {%- set devices = entities | map('device_id') | list -%}
