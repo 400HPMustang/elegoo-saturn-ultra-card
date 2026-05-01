@@ -1,117 +1,141 @@
 # Elegoo Saturn 4 Ultra – Lovelace Card
 
-A Home Assistant Lovelace card that presents a clean, high-contrast status panel for Elegoo resin printers (tested with the Saturn 4 Ultra). It auto-discovers printers from the `elegoo_printer` integration and renders one **picture-elements** panel per device, complete with live chamber camera, progress, layer info, UV LED temperature, error reason, and quick controls (pause/resume/stop).
+A Home Assistant Lovelace card that presents a clean, high-contrast status panel for Elegoo resin printers, tested with the Saturn 4 Ultra. It auto-discovers printers from the `elegoo_printer` integration and renders one `picture-elements` panel per device, complete with live chamber camera, progress, layer info, UV LED temperature, error reason, and quick controls.
 
 ![Card background](assets/saturn_4_ultra.png)
 
 ## Features
+
 - Works with multiple printers discovered from the `elegoo_printer` integration.
-- Live camera tile (center) using `camera.<base>_chamber_camera`.
-- Key stats: current status, percent complete, remaining time (**rendered as `Hh Mm` from minute sensor**), current/total layers.
-- **UV LED temperature chip (always visible):** shows `—` when the printer is off or the value is warming up/unknown; displays **one decimal place** when available.
-- **Controls always visible**: Pause / Play / Stop stay in place and switch between **active** and **ghosted** based on print status.
-- Shows current file name (strips path and extension; **clamped with ellipsis** for long names).
-- Highlights error reason when reported.
-- Uses a background PNG for a polished look.
-- *(Optional)* **Power button**: if a plug named `switch.<base>_power` exists, a power icon appears (clickable when Off/Idle/Stopped/Complete; ghosted during active printing).
+- Live camera tile using `camera.<base>_chamber_camera`.
+- Key stats: current status, percent complete, remaining time rendered as `Hh Mm`, current layer, and total layers.
+- UV LED temperature chip that stays visible and shows `—` when the printer is off or unavailable.
+- Always-visible Pause, Play, Stop, and optional Power icons.
+- Controls are handled by `custom:button-card` JavaScript styles instead of duplicated conditional icon blocks.
+- Confirmation prompts on Stop and Power actions.
+- Current file name display, path/extension stripped and clamped with ellipsis.
+- Error reason highlight when reported.
+- Optional smart-plug power control using `switch.<base>_power`.
 
-## Controls: always visible (active vs. ghosted)
+## Control behavior
 
-The Pause / Play / Stop icons are always visible. They switch between **active** (clickable) and **ghosted** (dimmed, non-clickable) using `sensor.<base>_print_status`.
+| Status | Pause | Play | Stop | Power |
+| --- | :---: | :---: | :---: | :---: |
+| `printing`, `homing`, `dropping`, `lifting`, `file_checking`, `recovery`, `loading` | Active | Ghost | Active + confirmation | Ghost |
+| `paused` | Ghost | Active | Active + confirmation | Ghost |
+| `pausing` | Ghost | Ghost | Active + confirmation | Ghost |
+| `stopping` | Ghost | Ghost | Ghost | Ghost |
+| `idle`, `complete`, `stopped` | Ghost | Ghost | Ghost | Active + confirmation |
+| Plug off | Ghost | Ghost | Ghost | Active + confirmation |
 
-| Status                                                                 | Pause | Play | Stop | Notes                         |
-|------------------------------------------------------------------------|:-----:|:----:|:----:|--------------------------------|
-| `printing`, `homing`, `dropping`, `lifting`, `file_checking`, `recovery`, `loading` | **Active** | Ghost | **Active** | Busy/in-progress states       |
-| `paused`                                                               | Ghost | **Active** | **Active** | Resume or stop                |
-| `pausing`                                                              | Ghost | Ghost | **Active** | Transitioning; only Stop stays active |
-| `stopping`                                                             | Ghost | Ghost | Ghost | Already stopping              |
-| `idle`, `complete`, `stopped`                                          | Ghost | Ghost | Ghost | Nothing actionable            |
-
-> “Ghosted” = visible but disabled (`pointer-events: none`) and dimmed.
-
-**How it works (high-level)**  
-- **Pause** is active when status is **not** one of: `idle`, `complete`, `stopped`, `paused`, `pausing`, `stopping`.  
-- **Play** is active **only** when `paused`.  
-- **Stop** is active when status is **not** one of: `idle`, `complete`, `stopped`, `stopping`.
-
-**Customize the behavior**  
-Prefer Pause to stay active during `pausing`? Remove `pausing` from Pause’s “not in” list. Want Stop active during `stopping`? Remove `stopping` from Stop’s “not in” list. (Search the Lovelace YAML for `'_print_status'` and edit the `conditional` blocks’ `state`/`state_not` values.)
-
-**Theming & ghost color**  
-Ghost icons are dimmed with either:
-- `opacity: 0.5` + `color: white` (default), or  
-- `color: rgba(255,255,255,0.55)` and no `opacity` (more consistent across themes/backgrounds).
+“Ghost” means visible but dimmed and disabled with `pointer-events: none`.
 
 ## Requirements
-- **Home Assistant** with a working [**Elegoo printer** integration](https://github.com/danielcherubini/elegoo-homeassistant) exposing entities like:
-  - `sensor.<base>_current_status` **or** `sensor.<base>_print_status` (anchor)
+
+- Home Assistant with a working [Elegoo printer integration](https://github.com/danielcherubini/elegoo-homeassistant) exposing entities such as:
+  - `sensor.<base>_current_status` or `sensor.<base>_print_status`
   - `sensor.<base>_percent_complete`
   - `sensor.<base>_remaining_print_time`
-  - `sensor.<base>_current_layer`, `sensor.<base>_total_layers`
-  - `sensor.<base>_file_name`, `sensor.<base>_error_status_reason`
+  - `sensor.<base>_current_layer`
+  - `sensor.<base>_total_layers`
+  - `sensor.<base>_file_name`
+  - `sensor.<base>_error_status_reason`
   - `sensor.<base>_uv_led_temp`
   - `camera.<base>_chamber_camera`
-  - `button.<base>_pause_print`, `button.<base>_resume_print`, `button.<base>_stop_print`
-- Lovelace custom cards (install via HACS):
+  - `button.<base>_pause_print`
+  - `button.<base>_resume_print`
+  - `button.<base>_stop_print`
+- Lovelace custom cards, installable via HACS:
   - [`auto-entities`](https://github.com/thomasloven/lovelace-auto-entities)
   - [`layout-card`](https://github.com/thomasloven/lovelace-layout-card)
   - [`button-card`](https://github.com/custom-cards/button-card)
-- *(Optional)* Smart plug named `switch.<base>_power` to enable the power icon.
+- Optional smart plug named `switch.<base>_power` to enable the power icon.
 
 ## Installation
-1. Copy **assets/saturn_4_ultra.png** into your Home Assistant `/config/www/` folder.
-   - After copying, it will be available in Lovelace as: `/local/saturn_4_ultra.png` (already referenced in the YAML).
-2. Add the YAML from `lovelace/elegoo_saturn_ultra_card.yaml` to your dashboard:
-   - *UI mode*: **Edit dashboard → Add card → Manual** and paste the YAML.
-   - *YAML mode*: include the file or paste into your view’s cards list.
-3. Confirm your Elegoo entities exist and follow the `<base>_…` pattern used above. The card auto-generates one panel per device by detecting an “anchor” sensor ending in `_current_status` (or `_print_status` as a fallback).
+
+1. Copy `assets/saturn_4_ultra.png` into your Home Assistant `/config/www/` folder.
+   - In Lovelace, this is referenced as `/local/saturn_4_ultra.png`.
+2. Add the YAML from `lovelace/elegoo_saturn_ultra_card.yaml` to your dashboard.
+   - UI mode: Edit dashboard → Add card → Manual and paste the YAML.
+   - YAML mode: include the file or paste it into your view's `cards:` list.
+3. Confirm your Elegoo entities follow the `<base>_...` naming pattern used by the integration.
+
+## Updating safely
+
+The recommended update flow is to test changes on a separate Git branch first:
+
+```bash
+git checkout main
+git pull
+git checkout -b card-cleanup-controls-hacs
+```
+
+Copy the updated files into the repo, commit them, and test them in Home Assistant:
+
+```bash
+git status
+git add README.md CHANGELOG.md hacs.json info.md elegoo_saturn_ultra_card.jinja lovelace/elegoo_saturn_ultra_card.yaml docs/UPDATE_AND_ROLLBACK.md
+git commit -m "Clean up Elegoo card controls and add HACS metadata"
+```
+
+If the card works, merge it back:
+
+```bash
+git checkout main
+git merge card-cleanup-controls-hacs
+git push
+```
+
+If something breaks, roll back by switching back to `main` without merging:
+
+```bash
+git checkout main
+git branch -D card-cleanup-controls-hacs
+```
+
+For more options, see [`docs/UPDATE_AND_ROLLBACK.md`](docs/UPDATE_AND_ROLLBACK.md).
 
 ## Customization
-- Replace the background at `image: '/local/saturn_4_ultra.png'` if you prefer a different art style.
-- Tweak element positions by editing the `style.top/left` percentages.
-- **Filename length**: adjust the clamp by changing the `width/max-width` (e.g., `15ch`) in the filename label styles.
-- If you want to show only a specific printer, wrap the card with `auto-entities` filters or fork the template to hard-set `base` to the device you want.
+
+- Replace the background at `image: '/local/saturn_4_ultra.png'` if you prefer different art.
+- Tweak element positions by editing each element's `style.top` and `style.left` percentages.
+- Filename length: adjust `width` and `max-width`, currently `15ch`, in the filename `state-label` style.
+- To show only one printer, wrap the card with tighter `auto-entities` filters or fork the template and hard-code `base`.
 
 ## Troubleshooting
-- **Card renders blank**: Usually means no anchor sensor was found. Ensure either `sensor.<base>_current_status` or `sensor.<base>_print_status` exists for your printer and the integration is loaded.
-- **No background image**: Verify the file is at `/config/www/saturn_4_ultra.png` and the Lovelace path `/local/saturn_4_ultra.png` is correct. Clear browser cache/hard-refresh.
-- **Buttons do nothing**: Confirm you have the `button.*` entities and that your account has permission to call `button.press`.
-- **Power icon not visible**: Ensure your plug entity is named `switch.<base>_power`. The icon is clickable when the plug is OFF, and when ON in safe states (`idle`, `stopped`, `complete`); it is ghosted during active printing.
-- **Sensors show “unavailable” right after turning on**: The card masks these with sensible defaults:
-  - UV Temp → `—`
-  - Remaining time → `—` (until minutes are reported; then shows `Hh Mm`)
-  - Status → **Off**, Percent → **0%**, Layer/Total → **0** when plug is off
 
-## Example YAML
-See [`lovelace/elegoo_saturn_ultra_card.yaml`](lovelace/elegoo_saturn_ultra_card.yaml) for the full, ready-to-paste configuration (the same content you see in this repository).
+- **Card renders blank:** Usually means no anchor sensor was found. Make sure either `sensor.<base>_current_status` or `sensor.<base>_print_status` exists.
+- **No background image:** Verify the file exists at `/config/www/saturn_4_ultra.png` and the Lovelace path `/local/saturn_4_ultra.png` is correct. Then hard-refresh the browser.
+- **Buttons do nothing:** Confirm the `button.<base>_pause_print`, `button.<base>_resume_print`, and `button.<base>_stop_print` entities exist and that your user can call services.
+- **Power icon not visible:** Make sure the plug entity is named `switch.<base>_power`. The card hides the power icon if that switch does not exist or is unavailable.
+- **Controls are ghosted without a smart plug:** This version treats a missing `switch.<base>_power` as “not off,” so controls can still work without a smart plug. If controls are still ghosted, check `sensor.<base>_print_status`.
 
-## Examples
-| Active controls | Idle controls |
-| --- | --- |
-| <img src="assets/card_example_active.png" width="420" alt="Active controls"> | <img src="assets/card_example_idle.png" width="420" alt="Idle controls"> |
+## HACS note
 
-## Folder Structure
-```
+This repository is a Lovelace YAML package, not a compiled frontend JavaScript card. The included `hacs.json` and root `.jinja` file are intended to make the repo easier to track as a HACS custom-template-style repository, but users will still need to paste/include the Lovelace YAML in their dashboard.
+
+## Folder structure
+
+```text
 elegoo-saturn-ultra-card/
 ├─ assets/
-│ └─ saturn_4_ultra.png
+│  └─ saturn_4_ultra.png
+├─ docs/
+│  └─ UPDATE_AND_ROLLBACK.md
 ├─ lovelace/
-│ └─ elegoo_saturn_ultra_card.yaml
-├─ .gitignore
+│  └─ elegoo_saturn_ultra_card.yaml
+├─ CHANGELOG.md
+├─ elegoo_saturn_ultra_card.jinja
+├─ hacs.json
+├─ info.md
 ├─ LICENSE
 └─ README.md
-
 ```
 
-
 ## License
+
 MIT — see [`LICENSE`](LICENSE).
 
 ## Credits
+
 Art and YAML template by the project author. Not affiliated with Elegoo.
-
----
-
-## Changelog
-- **2025-08-16** — UV Temp chip always visible with `—` when off/unavailable; one-decimal formatting. Remaining time now rendered as `Hh Mm`. Filename clamped with ellipsis. Optional power icon via `switch.<base>_power`. Off-state defaults for status/percent/layers/time.
-- **2025-08-15** — Controls now always visible; state-based ghosting for Pause/Play/Stop; unified text glow and icon sizes.
