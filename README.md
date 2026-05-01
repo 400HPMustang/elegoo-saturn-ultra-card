@@ -60,41 +60,6 @@ A Home Assistant Lovelace card that presents a clean, high-contrast status panel
    - YAML mode: include the file or paste it into your view's `cards:` list.
 3. Confirm your Elegoo entities follow the `<base>_...` naming pattern used by the integration.
 
-## Updating safely
-
-The recommended update flow is to test changes on a separate Git branch first:
-
-```bash
-git checkout main
-git pull
-git checkout -b card-cleanup-controls-hacs
-```
-
-Copy the updated files into the repo, commit them, and test them in Home Assistant:
-
-```bash
-git status
-git add README.md CHANGELOG.md hacs.json info.md elegoo_saturn_ultra_card.jinja lovelace/elegoo_saturn_ultra_card.yaml docs/UPDATE_AND_ROLLBACK.md
-git commit -m "Clean up Elegoo card controls and add HACS metadata"
-```
-
-If the card works, merge it back:
-
-```bash
-git checkout main
-git merge card-cleanup-controls-hacs
-git push
-```
-
-If something breaks, roll back by switching back to `main` without merging:
-
-```bash
-git checkout main
-git branch -D card-cleanup-controls-hacs
-```
-
-For more options, see [`docs/UPDATE_AND_ROLLBACK.md`](docs/UPDATE_AND_ROLLBACK.md).
-
 ## Customization
 
 - Replace the background at `image: '/local/saturn_4_ultra.png'` if you prefer different art.
