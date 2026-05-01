@@ -8,6 +8,11 @@ card_param: cards
 filter:
   template: >
     {%- set entities = integration_entities('elegoo_printer') -%}
+    {%- if entities | count == 0 -%}
+    [
+      { 'type':'markdown','content':'**Saturn 4**\nElegoo Printer integration not loaded' }
+    ]
+    {%- else -%}
     {%- set devices = entities | map('device_id') | list -%}
     {%- set zip_list = zip(entities, devices) | list -%}
     [
@@ -422,6 +427,7 @@ filter:
       }}{{ "," if not loop.last else "" }}
     {%- endfor -%}
     ]
+    {%- endif -%}
 grid_options:
   columns: full
   rows: 1
