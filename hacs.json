@@ -1,0 +1,6 @@
+{
+  "name": "Elegoo Saturn Ultra Card",
+  "content_in_root": true,
+  "filename": "elegoo_saturn_ultra_card.jinja",
+  "homeassistant": "2024.6.0"
+}
