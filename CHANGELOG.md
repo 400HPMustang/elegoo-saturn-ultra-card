@@ -2,6 +2,8 @@
 
 ## 2026-05-01
 
+- Restored the fallback Markdown card shown when no Elegoo printer integration entities are loaded.
+
 - Reformatted the Lovelace YAML so it is readable and easier to diff.
 - Replaced the duplicated conditional Pause / Play / Stop / Power blocks with single `custom:button-card` controls that compute active/ghosted state in JavaScript styles.
 - Added confirmation prompts to Stop and Power actions.
@@ -22,3 +24,9 @@
 - Controls always visible.
 - State-based ghosting for Pause, Play, and Stop.
 - Unified text glow and icon sizes.
+
+### Fallback card
+
+- Added optional fallback controls when `integration_entities('elegoo_printer')` returns no entities.
+- Fallback now includes a Power On button and a Re-check button using the manually configured fallback power entity.
+
